@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Shane-Neeley/mongodb-to-elasticsearch-query#readme",
   "devDependencies": {
+    "underscore": "^1.8.3",
     "mocha": "^3.2.0",
     "should": "^11.1.1"
   }
