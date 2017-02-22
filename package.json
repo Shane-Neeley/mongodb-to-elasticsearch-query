@@ -1,10 +1,10 @@
 {
   "name": "mongodb-to-elasticsearch-query",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A module to convert simple mongodb queries into elasticsearch queries",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/mocha ./test/root.js ./test --recursive --timeout 150000"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/Shane-Neeley/mongodb-to-elasticsearch-query#readme",
   "devDependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.2.0"
+    "mocha": "^3.2.0",
+    "should": "^11.1.1"
   }
 }
