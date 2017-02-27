@@ -11,7 +11,7 @@ module.exports = {
     convert: function(q) {
 
         console.log('query')
-        console.log(q)
+        console.log(JSON.stringify(q))
 
         var es = {
             query: {
@@ -28,43 +28,55 @@ module.exports = {
             for (var property in obj) {
                 if (obj.hasOwnProperty(property)) {
                     if (typeof obj[property] == "object") {
-                        iterate(obj[property], stack + '---' + property);
+                        iterate(obj[property], stack + ',' + property);
                     }
                     else {
-                        props.push(stack + '---' + property)
+                        props.push(stack + ',' + property)
                     }
                 }
             }
         }
 
+
         var props = []
         iterate(q, '')
         props = _.map(props, function(p){
-            return p.slice(3) // remove the first "---"
+            return p.slice(1) // remove the first ","
         })
 
         console.log('props')
         console.log(props)
 
+
         _.each(props, function(propStr) {
-            var subs = propStr.split('---')
+            var subs = propStr.split(',')
             if (!_.contains(subs, "$and") && !_.contains(subs, "$or")) {
                 _.each(subs, function(f) {
                     // if doesn't have a $ field, make straight musts
-                    var termQ = {match:{}}
-                    termQ.term[f] = q[f]
-                    es.query.bool.must.push(termQ)
+                    var mq = {match:{}}
+                    mq.match[f] = q[f]
+                    es.query.bool.must.push(mq)
                 })
             }
         })
+
+
+        var boolMust = {bool:{must:[]}}
+        var boolShould = {bool:{should:[]}}
+        var deepCopy = function(obj) {return JSON.parse(JSON.stringify(obj))}
+
         if (q.$and) {
-            _.each(q.$and, function(tq) {
-                es.query.bool.must.push({match: tq})
+            _.each(q.$and, function(mq) {
+                var b = deepCopy(boolMust)
+                b.must.push({match: mq})
+                es.query.bool.must.push(b)
             })
         }
         if (q.$or) {
-            _.each(q.$or, function(tq) {
-                es.query.bool.should.push({match: tq})
+            _.each(q.$or, function(mq) {
+                var b = deepCopy(boolShould)
+                b.must.push({match: mq})
+                es.query.bool.must.push(b)
             })
         }
         if (_.isEmpty(es.query.bool.must)) delete es.query.bool.must
