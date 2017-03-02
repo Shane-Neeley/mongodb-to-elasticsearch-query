@@ -13,74 +13,62 @@ module.exports = {
         console.log('query')
         console.log(JSON.stringify(q))
 
+        // http://stackoverflow.com/questions/15690706/recursively-looping-through-an-object-to-build-a-property-list
+        // recursively list the properties of this object
         var es = {
             query: {
                 bool: {
                     must: [],
-                    should: []
+                    //should: []
                 }
             }
         }
 
-        // http://stackoverflow.com/questions/15690706/recursively-looping-through-an-object-to-build-a-property-list
-        // recursively list the properties of this object
-        function iterate(obj, stack) {
+        es.query.bool.must.push({bool:{must:[]}})
+        es.query.bool.must.push({bool:{should:[]}})
+        //es.query.bool.should.push({bool:{must:[]}})
+        //es.query.bool.should.push({bool:{should:[]}})
+
+        var inAnd, inOr
+        function iterate(obj) {
             for (var property in obj) {
-                if (obj.hasOwnProperty(property)) {
-                    if (typeof obj[property] == "object") {
-                        iterate(obj[property], stack + ',' + property);
+                console.log('\n')
+                // operator
+                if (typeof obj[property] == "object" && (property == "$and" || obj[property].$and)) {
+                    console.log('step1')
+                    console.log(property)
+                    console.log(obj[property])
+                    inAnd = true
+                    inOr = false
+                    iterate(obj[property])
+                }
+                // operator
+                else if (typeof obj[property] == "object" && (property == "$or" || obj[property].$or)) {
+                    console.log('step2')
+                    console.log(property)
+                    console.log(obj[property])
+                    inOr = true
+                    inAnd = false
+                    iterate(obj[property])
+                }
+                // non-operator (a number index)
+                else if (typeof obj[property] == "object" && !obj[property].$and && !obj[property].$or) {
+                    console.log('step3')
+                    console.log(property)
+                    console.log(obj[property])
+                    if (inAnd === true) {
+                        console.log('step4 pushing: ' + JSON.stringify({match: obj[property]}))
+                        es.query.bool.must[0].bool.must.push({match: obj[property]})
                     }
-                    else {
-                        props.push(stack + ',' + property)
+                    if (inOr === true) {
+                        console.log('step5 pushing: ' + JSON.stringify({match: obj[property]}))
+                        es.query.bool.must[1].bool.should.push({match: obj[property]})
                     }
                 }
             }
         }
 
-
-        var props = []
-        iterate(q, '')
-        props = _.map(props, function(p){
-            return p.slice(1) // remove the first ","
-        })
-
-        console.log('props')
-        console.log(props)
-
-
-        _.each(props, function(propStr) {
-            var subs = propStr.split(',')
-            if (!_.contains(subs, "$and") && !_.contains(subs, "$or")) {
-                _.each(subs, function(f) {
-                    // if doesn't have a $ field, make straight musts
-                    var mq = {match:{}}
-                    mq.match[f] = q[f]
-                    es.query.bool.must.push(mq)
-                })
-            }
-        })
-
-
-        var boolMust = {bool:{must:[]}}
-        var boolShould = {bool:{should:[]}}
-        var deepCopy = function(obj) {return JSON.parse(JSON.stringify(obj))}
-
-        if (q.$and) {
-            _.each(q.$and, function(mq) {
-                var b = deepCopy(boolMust)
-                b.must.push({match: mq})
-                es.query.bool.must.push(b)
-            })
-        }
-        if (q.$or) {
-            _.each(q.$or, function(mq) {
-                var b = deepCopy(boolShould)
-                b.must.push({match: mq})
-                es.query.bool.must.push(b)
-            })
-        }
-        if (_.isEmpty(es.query.bool.must)) delete es.query.bool.must
-        if (_.isEmpty(es.query.bool.should)) delete es.query.bool.should
+        iterate(q)
 
         console.log('result')
         console.log(JSON.stringify(es))
