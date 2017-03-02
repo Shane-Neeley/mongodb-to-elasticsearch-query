@@ -6,10 +6,27 @@ describe('When passed in a mongo query', function() {
     it('should convert it to an ES query - basic query', function() {
         var q = {name: "George"}
         mongo2es(q).should.deepEqual({
-            query: {
-                bool: {
-                    must: [
-                        {match: {name: "George"}}
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "match": {
+                                            "name": "George"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "bool": {
+                                "should": [
+
+                                ]
+                            }
+                        }
                     ]
                 }
             }
@@ -19,11 +36,32 @@ describe('When passed in a mongo query', function() {
     it('should convert it to an ES query - basic query >1 props', function() {
         var q = {name: "George", flag: true}
         mongo2es(q).should.deepEqual({
-            query: {
-                bool: {
-                    must: [
-                        {match: {name: "George"}},
-                        {match: {flag: true}}
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "match": {
+                                            "name": "George"
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "flag": true
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "bool": {
+                                "should": [
+
+                                ]
+                            }
+                        }
                     ]
                 }
             }
@@ -33,11 +71,32 @@ describe('When passed in a mongo query', function() {
     it('should convert it to an ES query - basic $and query', function() {
         var q = {$and:[{name: "George"}, {lastname: "Greg"}]}
         mongo2es(q).should.deepEqual({
-            query: {
-                bool: {
-                    must: [
-                        {match: {name: "George"}},
-                        {match: {lastname: "Greg"}}
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "match": {
+                                            "name": "George"
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "lastname": "Greg"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "bool": {
+                                "should": [
+
+                                ]
+                            }
+                        }
                     ]
                 }
             }
@@ -47,11 +106,32 @@ describe('When passed in a mongo query', function() {
     it('should convert it to an ES query - basic $or query', function() {
         var q = {$or:[{name: "George"}, {lastname: "Greg"}]}
         mongo2es(q).should.deepEqual({
-            query: {
-                bool: {
-                    should: [
-                        {match: {name: "George"}},
-                        {match: {lastname: "Greg"}}
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "bool": {
+                                "must": [
+
+                                ]
+                            }
+                        },
+                        {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "match": {
+                                            "name": "George"
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "lastname": "Greg"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
                     ]
                 }
             }
@@ -98,10 +178,27 @@ describe('When passed in a mongo query', function() {
     it('should convert it to an ES query - query into a subfield', function() {
         var q = {"name.lastname": "George"}
         mongo2es(q).should.deepEqual({
-            query: {
-                bool: {
-                    must: [
-                        {match: {"name.lastname": "George"}}
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "match": {
+                                            "name.lastname": "George"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "bool": {
+                                "should": [
+
+                                ]
+                            }
+                        }
                     ]
                 }
             }
@@ -121,21 +218,30 @@ describe('When passed in a mongo query', function() {
             ]
         }
         mongo2es(q).should.deepEqual({
-            query: {
-                bool: {
-                    should: [
+            "query": {
+                "bool": {
+                    "must": [
                         {
-                            bool: {
-                                must: [
-                                    {match: {"name": "BRAF V600E"}},
-                                    {match: {"exclude": false}}
+                            "bool": {
+                                "must": [
+
                                 ]
                             }
                         },
                         {
-                            bool: {
-                                must: [
-                                    {match: {"GRCh37_location.compositeKey": "827ded099a8adce3b2f8dad94a6e1140"}}
+                            "bool": {
+                                "should": [
+                                    {
+                                        "match": {
+                                            "name": "BRAF V600E",
+                                            "exclude": false
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "GRCh37_location.compositeKey": "827ded099a8adce3b2f8dad94a6e1140"
+                                        }
+                                    }
                                 ]
                             }
                         }
@@ -157,11 +263,32 @@ describe('When passed in a mongo query', function() {
             ]
         }
         mongo2es(q).should.deepEqual({
-            query: {
-                bool: {
-                    must: [
-                        {match: {"GRCh37_location.compositeKey": "d0c49705b1a4a882f842d69b715f5c26"}},
-                        {match: {"GRCh37_location.transcript_consequences.transcript": "ENST00000417037.2"}}
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "match": {
+                                            "GRCh37_location.compositeKey": "d0c49705b1a4a882f842d69b715f5c26"
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "GRCh37_location.transcript_consequences.transcript": "ENST00000417037.2"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "bool": {
+                                "should": [
+
+                                ]
+                            }
+                        }
                     ]
                 }
             }

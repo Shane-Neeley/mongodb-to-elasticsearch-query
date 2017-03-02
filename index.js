@@ -33,36 +33,43 @@ module.exports = {
         function iterate(obj) {
             for (var property in obj) {
                 console.log('\n')
-                // operator
-                if (typeof obj[property] == "object" && (property == "$and" || obj[property].$and)) {
-                    console.log('step1')
-                    console.log(property)
-                    console.log(obj[property])
-                    inAnd = true
-                    inOr = false
-                    iterate(obj[property])
-                }
-                // operator
-                else if (typeof obj[property] == "object" && (property == "$or" || obj[property].$or)) {
-                    console.log('step2')
-                    console.log(property)
-                    console.log(obj[property])
-                    inOr = true
-                    inAnd = false
-                    iterate(obj[property])
-                }
-                // non-operator (a number index)
-                else if (typeof obj[property] == "object" && !obj[property].$and && !obj[property].$or) {
-                    console.log('step3')
-                    console.log(property)
-                    console.log(obj[property])
-                    if (inAnd === true) {
-                        console.log('step4 pushing: ' + JSON.stringify({match: obj[property]}))
-                        es.query.bool.must[0].bool.must.push({match: obj[property]})
+                if (obj.hasOwnProperty(property)) {
+                    // operator
+                    if (typeof obj[property] == "object" && (property == "$and" || obj[property].$and || property == "$in" || obj[property].$in)) {
+                        console.log('step1')
+                        console.log(property)
+                        console.log(obj[property])
+                        inAnd = true
+                        inOr = false
+                        iterate(obj[property])
                     }
-                    if (inOr === true) {
-                        console.log('step5 pushing: ' + JSON.stringify({match: obj[property]}))
-                        es.query.bool.must[1].bool.should.push({match: obj[property]})
+                    // operator
+                    else if (typeof obj[property] == "object" && (property == "$or" || obj[property].$or)) {
+                        console.log('step2')
+                        console.log(property)
+                        console.log(obj[property])
+                        inOr = true
+                        inAnd = false
+                        iterate(obj[property])
+                    }
+                    // non-operator (a number index)
+                    else if (typeof obj[property] == "object" && !obj[property].$and && !obj[property].$or) {
+                        console.log('step3')
+                        console.log(property)
+                        console.log(obj[property])
+                        if (inAnd === true) {
+                            console.log('step4 pushing: ' + JSON.stringify({match: obj[property]}))
+                            es.query.bool.must[0].bool.must.push({match: obj[property]})
+                        }
+                        if (inOr === true) {
+                            console.log('step5 pushing: ' + JSON.stringify({match: obj[property]}))
+                            es.query.bool.must[1].bool.should.push({match: obj[property]})
+                        }
+                    }
+                    else {
+                        var mq = {match:{}}
+                        mq.match[property] = obj[property]
+                        es.query.bool.must[0].bool.must.push(mq)
                     }
                 }
             }
