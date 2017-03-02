@@ -312,22 +312,38 @@ describe('When passed in a mongo query', function() {
             ]
         }
         mongo2es(q).should.deepEqual({
-            query: {
-                bool: {
-                    must: [
+            "query": {
+                "bool": {
+                    "must": [
                         {
-                            bool: {
-                                should: [
-                                    {match: {txSites: "NM_001025366.2:262"}},
-                                    {match: {txSites: "Another one"}}
+                            "bool": {
+                                "must": [
+                                    {
+                                        "match": {
+                                            "txSites": "NM_001025366.2:262"
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "txSites": "Another one"
+                                        }
+                                    }
                                 ]
                             }
                         },
                         {
-                            bool: {
-                                should: [
-                                    {match: {mutation_type: "domain"}},
-                                    {match: {mutation_type: "hotspot"}}
+                            "bool": {
+                                "should": [
+                                    {
+                                        "match": {
+                                            "mutation_type": "domain"
+                                        }
+                                    },
+                                    {
+                                        "match": {
+                                            "mutation_type": "hotspot"
+                                        }
+                                    }
                                 ]
                             }
                         }
